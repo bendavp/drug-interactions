@@ -28,28 +28,39 @@ RETURN s.name as side_effects
 WITH ["LIST OF DRUGS..."] AS regimen
 MATCH (d:Drug)-[:CAUSES]->(s:SideEffect)
 WHERE d.name IN regimen
-RETURN s.name as side_effects
-UNION
+
+WITH COLLECT(s.name) AS side_effects
+
 MATCH (d1:Drug)-[:INTERACTS]->(i:Interaction)<-[:INTERACTS]-(d2:Drug)
 MATCH (i:Interaction)-[:CAUSES]->(s:SideEffect)
 WHERE d1.name IN regimen AND d2.name IN regimen
-RETURN s.name as side_effects
+
+RETURN side_effects + COLLECT(s.name) AS side_effects
 
 // What are the NEW side effects of adding a new drug to a patient's existing
 // regimen? First, get the drugs and side effects of patient's regimen:
-WITH ["LIST OF DRUGS..."] AS regimen
 CALL {
+    WITH ["LIST OF DRUGS..."] AS regimen
     MATCH (d:Drug)-[:CAUSES]->(s:SideEffect)
     WHERE d.name IN regimen
-    RETURN d, s
-    UNION
+    
+    WITH COLLECT(d) as drug_regimen, COLLECT(s) as existing_side_effects
+    
     MATCH (d1:Drug)-[:INTERACTS]->(i:Interaction)<-[:INTERACTS]-(d2:Drug)
     MATCH (i:Interaction)-[:CAUSES]->(s:SideEffect)
     WHERE d1.name IN regimen AND d2.name IN regimen
-    RETURN d1, d2, s
+    RETURN drug_regimen + COLLECT(d1) + COLLECT(d2) as drug_regimen, existing_side_effects + COLLECT(s) as existing_side_effects
 }
 
 // Next, look for interactions between a proposed new drug and existing drugs
+WITH "NEW DRUG" as new_drug
+MATCH (:Drug {name: new_drug})-[:CAUSES]->(new_effects:SideEffect)
+WHERE NOT new_effects IN existing_side_effects
+
+MATCH (:Drug {name: new_drug})-[:INTERACTS]->(i:Interaction)<-[:INTERACTS]-(other_drug:Drug)
+MATCH (i)-[:CAUSES]->(s:SideEffect)
+WHERE NOT s IN existing_side_effects AND other_drug IN drug_regimen
+RETURN COLLECT(new_effects.name) + COLLECT(s.name) AS new_side_effects
 
 // Given a side effect, tell me which drugs (or combinations of drugs) may be 
 // causing that side effect
@@ -62,5 +73,3 @@ CALL {
     MATCH (dis:Disease {name: "DISEASE NAME"})<-[:TREATS]-(drug:Drug)
     RETURN collect(drug) as options
 } // finish combining with query above for finding new side effects
-
-
