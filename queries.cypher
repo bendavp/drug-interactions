@@ -64,7 +64,7 @@ RETURN COLLECT(new_effects.name) + COLLECT(s.name) AS new_side_effects
 
 // Given a side effect, tell me which drugs (or combinations of drugs) may be 
 // causing that side effect
-MATCH (eff:Effect {name: "EFFECT NAME"})<-[:CAUSES]-(drugint)
+MATCH (eff:SideEffect {name: "EFFECT NAME"})<-[:CAUSES]-(drugint)
 RETURN eff, drugint
 
 // Given a disease, find the combination of drugs that will cause the least number of side
