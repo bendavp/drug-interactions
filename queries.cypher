@@ -48,4 +48,19 @@ CALL {
     WHERE d1.name IN regimen AND d2.name IN regimen
     RETURN d1, d2, s
 }
+
 // Next, look for interactions between a proposed new drug and existing drugs
+
+// Given a side effect, tell me which drugs (or combinations of drugs) may be 
+// causing that side effect
+MATCH (eff:Effect {name: "EFFECT NAME"})<-[:CAUSES]-(drugint)
+RETURN eff, drugint
+
+// Given a disease, find the combination of drugs that will cause the least number of side
+// effects, given the drugs you’re already taking. This uses the query above
+CALL {
+    MATCH (dis:Disease {name: "DISEASE NAME"})<-[:TREATS]-(drug:Drug)
+    RETURN collect(drug) as options
+} // finish combining with query above for finding new side effects
+
+
