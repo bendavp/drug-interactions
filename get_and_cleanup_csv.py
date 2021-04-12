@@ -28,14 +28,14 @@ given ID with the found cid (for easy joining when importing into neo4J), then
 get that drug's name/synonym.'''
 for idx, disease_id, drug_id in zip(drug_disease.index, drug_disease['Disease ID'], drug_disease['Drug ID']):
     # to make sure MeSH querying doesn't time out due to too many requests
-    time.sleep(0.1)
+    time.sleep(0.2)
     try:
         drug_disease['Disease Name'][idx] = requests.get(
             f"https://id.nlm.nih.gov/mesh/lookup/details?descriptor={disease_id[5:]}&includes=terms").json()['terms'][0]['label']
         drug_data = pcp.get_compounds(drug_id, 'name')[0]
         drug_disease['Drug ID'][idx] = drug_data.cid
         drug_disease['Drug Name'][idx] = drug_data.synonyms[0]
-    except:
+    except (IndexError):
         drug_disease.drop(labels=idx, axis='index', inplace=True)
 
 # Log the final length of the DataFrame, to see how much data was lost
@@ -72,7 +72,7 @@ for idx, drug1_id, drug2_id in zip(drug_interaction_side_effects.index,
             int(drug1_id[3:])).synonyms[0]
         drug_interaction_side_effects['Drug 2 Name'][idx] = pcp.Compound.from_cid(
             int(drug2_id[3:])).synonyms[0]
-    except:
+    except (IndexError):
         drug_interaction_side_effects.drop(
             labels=idx, axis='index', inplace=True)
 
@@ -105,7 +105,7 @@ for idx, drug_id in zip(drug_side_effects.index, drug_side_effects['Drug ID']):
     try:
         drug_side_effects['Drug Name'][idx] = pcp.Compound.from_cid(
             int(drug_id[3:])).synonyms[0]
-    except:
+    except (IndexError):
         drug_side_effects.drop(labels=idx, axis='index', inplace=True)
 
 # Log the final length of the DataFrame, to see how much data was lost
@@ -114,6 +114,6 @@ print('Number of lost rows in drug_side_effects DataFrame:',
       initial_length - len(drug_side_effects))
 
 # Save the csv
-drug_side_effects.to_csv('drug_disease.csv')
+drug_side_effects.to_csv('drug_side_effects.csv')
 print('drug_side_effects CSV saved (3/3)!')
 print('All CSV processing done!')
