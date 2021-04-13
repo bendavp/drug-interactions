@@ -87,9 +87,10 @@ RETURN COLLECT(new_effects.name) + COLLECT(s.name) AS new_side_effects
 // Given a side effect, tell me which drugs (or combinations of drugs) may be 
 // causing that side effect
 MATCH (d:Drug)-[:CAUSES]->(s:SideEffect {name: "EFFECT NAME"})
-WITH COLLECT(d) as drugs
+WITH COLLECT(d) as drugs, COLLECT(d.name) as drug_names
 MATCH (d:Drug)-[:INTERACTS]->(i:Interaction)-[:CAUSES]->(s:SideEffect {name: "EFFECT NAME"})
-RETURN drugs + d
+WHERE NOT d in drugs
+RETURN drug_names + COLLECT(d.name)
 
 
 
