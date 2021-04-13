@@ -28,7 +28,7 @@ MERGE (drug)-[:CAUSES]->(s);
 
 // What are the side effects of a given drug?
 MATCH (d:Drug {name: "DRUG NAME"})-[:CAUSES]->(s:SideEffect)
-RETURN s.name as side_effects
+RETURN s.name as side_effects;
 
 
 
@@ -77,7 +77,7 @@ WHERE NOT new_effects IN existing_side_effects
 MATCH (:Drug {name: new_drug})-[:INTERACTS]->(i:Interaction)<-[:INTERACTS]-(other_drug:Drug)
 MATCH (i)-[:CAUSES]->(s:SideEffect)
 WHERE NOT s IN existing_side_effects AND other_drug IN drug_regimen
-RETURN COLLECT(new_effects.name) + COLLECT(s.name) AS new_side_effects
+RETURN COLLECT(new_effects.name) + COLLECT(s.name) AS new_side_effects;
 
 
 
@@ -90,7 +90,7 @@ MATCH (d:Drug)-[:CAUSES]->(s:SideEffect {name: "EFFECT NAME"})
 WITH COLLECT(d) as drugs, COLLECT(d.name) as drug_names
 MATCH (d:Drug)-[:INTERACTS]->(i:Interaction)-[:CAUSES]->(s:SideEffect {name: "EFFECT NAME"})
 WHERE NOT d in drugs
-RETURN drug_names + COLLECT(d.name)
+RETURN drug_names + COLLECT(d.name);
 
 
 
@@ -135,4 +135,4 @@ WHERE d IN potential_drugs AND other_drug IN drug_regimen AND NOT s IN existing_
 WITH d.name AS drug_name, COUNT(new_side_effects) + COUNT(s) as num_new_side_effects
 RETURN drug_name
 ORDER BY new_side_effects ASC
-LIMIT 1
+LIMIT 1;
