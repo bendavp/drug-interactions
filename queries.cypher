@@ -84,20 +84,13 @@ RETURN COLLECT(new_effects.name) + COLLECT(s.name) AS new_side_effects
 
 
 
-
 // Given a side effect, tell me which drugs (or combinations of drugs) may be 
 // causing that side effect
-MATCH (eff:SideEffect {name: "EFFECT NAME"})<-[:CAUSES]-(drugint)
-RETURN eff, drugint
-
-// Given a disease, find the combination of drugs that will cause the least number of side
-// effects, given the drugs you’re already taking. This uses the query above
-CALL {
-    MATCH (dis:Disease {name: "DISEASE NAME"})<-[:TREATS]-(drug:Drug)
-    RETURN collect(drug) as options
-} // finish combining with query above for finding new side effects
-
-
+MATCH (d:Drug)-[:CAUSES]->(s:SideEffect {name: "EFFECT NAME"})
+WITH COLLECT(d) as drugs, COLLECT(d.name) as drug_names
+MATCH (d:Drug)-[:INTERACTS]->(i:Interaction)-[:CAUSES]->(s:SideEffect {name: "EFFECT NAME"})
+WHERE NOT d in drugs
+RETURN drug_names + COLLECT(d.name)
 
 
 
@@ -120,7 +113,8 @@ CALL {
 }
 // Gets a list of drugs that treats a disease
 CALL {
-    RETURN ["LIST OF DRUGS..."] as potential_drugs
+    MATCH (dis:Disease {name: "DISEASE NAME"})<-[:TREATS]-(drug:Drug)
+    RETURN collect(drug) as potential_drugs
 }
 // Find the side effects that are caused by each new potential drug, that are
 // not already in the existing side effects.
