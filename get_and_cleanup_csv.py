@@ -69,7 +69,7 @@ all_disease_ids = set(drug_disease['Disease ID'])
 drug_id_cid_names = {}
 counter = 1
 for ncbi_drug_id in all_ncbi_drug_ids:
-    print("Processing drug #", counter, "/", len(all_drug_ids))
+    print("Processing drug #", counter, "/", len(all_ncbi_drug_ids))
     counter += 1
     time.sleep(0.2)
     try:
