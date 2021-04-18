@@ -1,31 +1,3 @@
-// Import drug-disease CSV into Neo4J
-LOAD CSV WITH HEADERS FROM 'file:///drug_disease.csv' AS row
-MERGE (drug:Drug {name: row.`Drug Name`, id: row.`Drug ID`})
-MERGE (disease:Disease {name: row.`Disease Name`, id: row.`Disease ID`})
-MERGE (drug)-[t:TREATS]->(disease);
-
-// Import drug-drug-side_effect CSV into Neo4J
-LOAD CSV WITH HEADERS FROM 'file:///drug_interaction_side_effects.csv' AS row
-MERGE (drug1:Drug {name: row.`Drug 1 Name`, id: row.`Drug 1 ID`})
-MERGE (drug2:Drug {name: row.`Drug 2 Name`, id: row.`Drug 2 ID`})
-MERGE (i:Interaction {drug1_name: row.`Drug 1 Name`, drug2_name: row.`Drug 2 Name`})
-MERGE (s:SideEffect {name: row.`Side Effect Name`, id: row.`Side Effect ID`})
-MERGE (drug1)-[:INTERACTS]->(i)<-[:INTERACTS]-(drug2)
-MERGE (i)-[:CAUSES]->(s);
-
-// Import drug-disease CSV into Neo4J
-LOAD CSV WITH HEADERS FROM 'file:///drug_side_effects.csv' AS row
-MERGE (drug:Drug {name: row.`Drug Name`, id: row.`Drug ID`})
-MERGE (s:SideEffect {name: row.`Side Effect Name`, id: row.`Side Effect ID`})
-MERGE (drug)-[:CAUSES]->(s);
-
-
-
-
-
-
-
-
 // What are the side effects of a given drug?
 MATCH (d:Drug {name: "DRUG NAME"})-[:CAUSES]->(s:SideEffect)
 RETURN s.name as side_effects;
