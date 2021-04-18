@@ -53,8 +53,9 @@ drug_side_effects['Drug Name'] = drug_side_effects['Drug ID'].apply(
     lambda drug: drug_id_names[drug])
 
 print("Saving both CSVs...")
-drug_interaction_side_effects.to_csv('drug_interaction_side_effects.csv')
-drug_side_effects.to_csv('drug_side_effects.csv')
+drug_interaction_side_effects.to_csv(
+    'drug_interaction_side_effects.csv', index=False)
+drug_side_effects.to_csv('drug_side_effects.csv', index=False)
 print("drug-side_effect and drug-drug-side_effect CSVs saved successfully!")
 
 # Import drug-disease csv
@@ -76,7 +77,7 @@ for ncbi_drug_id in all_ncbi_drug_ids:
         # Get appropriate compound based on NCBI ID
         drug_info = pcp.get_compounds(ncbi_drug_id, 'name')[0]
         # Get PubMed compound ID in the same format as previous two datasets
-        drug_id_cid_names[ncbi_drug_id] = ("CID" + str(drug_info.cid).zfill(8),
+        drug_id_cid_names[ncbi_drug_id] = ("CID" + str(drug_info.cid).zfill(9),
                                            drug_info.synonyms[0])
     except (IndexError):
         drug_disease = drug_disease[drug_disease['Drug ID'] != ncbi_drug_id]
@@ -105,5 +106,5 @@ drug_disease['Disease Name'] = drug_disease['Disease ID'].apply(
 
 # Save the csv
 print("Saving drug-disease CSV...")
-drug_disease.to_csv('drug_disease.csv')
+drug_disease.to_csv('drug_disease.csv', index=False)
 print("CSV saved successfully, all done!")
