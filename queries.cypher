@@ -87,42 +87,63 @@ RETURN potential_cause.name;
 
 
 
-// Gets a patient's current drug regimen, and the side effects caused by
-// that regimen
+// Gets a patient's current drug regimen, and a new disease they are not yet
+// being treated for, find THE drug that will treat their disease with the least
+// number of additional side effects
 CALL {
-    WITH ["LIST OF DRUGS..."] AS regimen
+    // Given a list of drugs (a patient's current regimen), find all side effects of
+    // the drugs (including interactions between them)
+    WITH ["carbamazepine"] AS regimen
     MATCH (d:Drug)-[:CAUSES]->(s:SideEffect)
     WHERE d.name IN regimen
-    
-    WITH COLLECT(d) as drug_regimen, COLLECT(s) as existing_side_effects
-    
-    MATCH (d1:Drug)-[:INTERACTS]->(i:Interaction)<-[:INTERACTS]-(d2:Drug)
-    MATCH (i:Interaction)-[:CAUSES]->(s:SideEffect)
-    WHERE d1.name IN regimen AND d2.name IN regimen
-    RETURN drug_regimen + COLLECT(d1) + COLLECT(d2) as drug_regimen, existing_side_effects + COLLECT(s) as existing_side_effects
+
+    WITH COLLECT(s) AS side_effects, regimen
+
+    // This subquery finds the side effects of an interaction between any two drugs
+    // in the regimen
+    CALL {
+        WITH regimen
+        MATCH (d1:Drug)-[:INTERACTS]->(i:Interaction)<-[:INTERACTS]-(d2:Drug)
+        MATCH (i)-[:CAUSES]->(s:SideEffect)
+        WHERE d1.name IN regimen AND d2.name IN regimen
+        RETURN COLLECT(s) as interaction_side_effects
+    }
+    RETURN side_effects + interaction_side_effects AS existing_side_effects, regimen as drug_regimen
 }
+WITH existing_side_effects, drug_regimen
 // Gets a list of drugs that treats a disease
 CALL {
-    MATCH (dis:Disease {name: "DISEASE NAME"})<-[:TREATS]-(drug:Drug)
+    MATCH (dis:Disease {name: "Nausea"})<-[:TREATS]-(drug:Drug)
     RETURN collect(drug) as potential_drugs
 }
+WITH potential_drugs, drug_regimen, existing_side_effects
+
 // Find the side effects that are caused by each new potential drug, that are
 // not already in the existing side effects.
 MATCH (d:Drug)-[:CAUSES]->(s:SideEffect)
 WHERE d IN potential_drugs AND NOT s IN existing_side_effects
 
-WITH d AS potential_drugs, s AS new_side_effects
+WITH COLLECT(d) AS potential_drugs, COLLECT(s) AS new_side_effects, existing_side_effects, drug_regimen
 
 // Find the side effects that are caused by each potential new drug's
 // interaction with an existing drug, that are not already in the existing side
 // effects or the side effects caused by the individual drug.
-MATCH (d:Drug)<-[:INTERACTS]-(i:Interaction)-[:INTERACTS]->(other_drug:Drug)
-MATCH (i:Interaction)-[:CAUSES]->(s:SideEffect)
-WHERE d IN potential_drugs AND other_drug IN drug_regimen AND NOT s IN existing_side_effects AND NOT s in new_side_effects
+CALL {
+    WITH potential_drugs, drug_regimen, existing_side_effects, new_side_effects
+    MATCH (d:Drug)<-[:INTERACTS]-(i:Interaction)-[:INTERACTS]->(other_drug:Drug)
+    MATCH (i:Interaction)-[:CAUSES]->(s:SideEffect)
+    WHERE d IN potential_drugs AND other_drug IN drug_regimen AND NOT s IN existing_side_effects AND NOT s in new_side_effects
+    RETURN COLLECT(d) AS potential_interactive_drugs, COLLECT(s) as new_interactive_side_effects
+}
+
+WITH potential_drugs + potential_interactive_drugs AS potential_drugs, new_side_effects + new_interactive_side_effects AS new_side_effects
 
 // Count how many NEW side effects are introduced by a potential drug.
 // Return THE drug with the least number of NEW side effects.
-WITH d.name AS drug_name, COUNT(new_side_effects) + COUNT(s) as num_new_side_effects
-RETURN drug_name
-ORDER BY new_side_effects ASC
+MATCH (d:Drug)-[:CAUSES]->(s:SideEffect)
+OPTIONAL MATCH (d:Drug)-[:INTERACTS]->(:Interaction)-[:CAUSES]->(s:SideEffect)
+WHERE d IN potential_drugs AND s IN new_side_effects
+WITH d.name AS drug_name, COLLECT(s.name) AS new_side_effects, COUNT(s) AS num_new_side_effects
+RETURN drug_name, new_side_effects, num_new_side_effects
+ORDER BY num_new_side_effects ASC
 LIMIT 1;
