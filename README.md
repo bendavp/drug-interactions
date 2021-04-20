@@ -14,7 +14,7 @@ Final project for DS4300 (Large Scale Information Storage & Retrieval) taken at 
 
 ## Contents:
 
-- the setup scripts (produces CSVs in a `data/` directory)
+- the setup scripts (produces CSVs in a `data/` directory, see `setup/` folder for specific instructions)
 - some example Cypher queries (`queries.cypher`)
 - powerpoint, summarizing key points of project goals and outcomes
 - a website
