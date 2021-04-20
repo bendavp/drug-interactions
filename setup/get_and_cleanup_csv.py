@@ -54,8 +54,8 @@ drug_side_effects['Drug Name'] = drug_side_effects['Drug ID'].apply(
 
 print("Saving both CSVs...")
 drug_interaction_side_effects.to_csv(
-    'drug_interaction_side_effects.csv', index=False)
-drug_side_effects.to_csv('drug_side_effects.csv', index=False)
+    'data/drug_interaction_side_effects.csv', index=False)
+drug_side_effects.to_csv('data/drug_side_effects.csv', index=False)
 print("drug-side_effect and drug-drug-side_effect CSVs saved successfully!")
 
 # Import drug-disease csv
@@ -106,5 +106,5 @@ drug_disease['Disease Name'] = drug_disease['Disease ID'].apply(
 
 # Save the csv
 print("Saving drug-disease CSV...")
-drug_disease.to_csv('drug_disease.csv', index=False)
+drug_disease.to_csv('data/drug_disease.csv', index=False)
 print("CSV saved successfully, all done!")

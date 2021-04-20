@@ -3,11 +3,11 @@ import pandas as pd
 # First, import CSVs generate by get_and_cleanup_csvs.py
 print("Importing CSVs...")
 drug_interaction_side_effects = pd.read_csv(
-    'drug_interaction_side_effects.csv')
+    'data/drug_interaction_side_effects.csv')
 
-drug_side_effects = pd.read_csv('drug_side_effects.csv')
+drug_side_effects = pd.read_csv('data/drug_side_effects.csv')
 
-drug_disease = pd.read_csv('drug_disease.csv')
+drug_disease = pd.read_csv('data/drug_disease.csv')
 
 # Generate a dictionary of side effect ID --> side effect name
 # to use for later CSV generation
@@ -17,9 +17,9 @@ side_effect_id_names = dict(zip(
 side_effect_id_names.update(dict(zip(drug_side_effects['Side Effect ID'],
                                      drug_side_effects['Side Effect Name'])))
 
-# Generate IDs of all Interaction nodes. Let's just make it the 
+# Generate IDs of all Interaction nodes. Let's just make it the
 # concatenation of the IDs of both drugs that interact together
-# to form the interaction. 
+# to form the interaction.
 # (d1:Drug)-[:Interacts]->(i:Interaction)<-[:Interacts]-(d2:Drug)
 all_interaction_ids = drug_interaction_side_effects['Drug 1 ID'].str.cat(
     drug_interaction_side_effects['Drug 2 ID'].values)
@@ -33,7 +33,7 @@ disease_nodes = pd.DataFrame(
 disease_nodes['namespace'] = drug_disease['Disease ID'].apply(
     lambda disease: disease[:6])
 disease_nodes.drop_duplicates(inplace=True)
-disease_nodes.to_csv('disease_nodes.csv', index=False)
+disease_nodes.to_csv('data/disease_nodes.csv', index=False)
 print("Done writing disease nodes!")
 
 # Make a CSV of all distinct Drug nodes in all 3 CSVs
@@ -55,10 +55,10 @@ drug_nodes = drug_nodes.append(
     ignore_index=True)
 drug_nodes.drop_duplicates(inplace=True)
 drug_nodes['namespace'] = 'PubChem'
-drug_nodes.to_csv('drug_nodes.csv', index=False)
+drug_nodes.to_csv('data/drug_nodes.csv', index=False)
 print("Done writing drug nodes!")
 
-# Make a CSV of all distinct SideEffect nodes 
+# Make a CSV of all distinct SideEffect nodes
 # from the dictionary generated earlier
 # Schema: ID, name, namespace
 print("Writing side effect nodes...")
@@ -66,7 +66,7 @@ side_effect_nodes = pd.DataFrame(
     {'sideEffectID:ID(SideEffect)': [s[1:] for s in side_effect_id_names.keys()], 'name': side_effect_id_names.values()})
 side_effect_nodes['namespace'] = 'PubChem'
 side_effect_nodes.drop_duplicates(inplace=True)
-side_effect_nodes.to_csv('side_effect_nodes.csv', index=False)
+side_effect_nodes.to_csv('data/side_effect_nodes.csv', index=False)
 print("Done writing side effect nodes!")
 
 # Make a CSV of all distinct (:Drug)-[:TREATS]->(:Disease) edges
@@ -86,7 +86,7 @@ interaction_nodes = pd.DataFrame({'interactionID:ID(Interaction)': all_interacti
                                   'Drug 1 Name': drug_interaction_side_effects['Drug 1 Name'],
                                   'Drug 2 Name': drug_interaction_side_effects['Drug 2 Name']})
 interaction_nodes.drop_duplicates(inplace=True)
-interaction_nodes.to_csv('interaction_nodes.csv', index=False)
+interaction_nodes.to_csv('data/interaction_nodes.csv', index=False)
 print("Done writing interaction nodes!")
 
 # Make a CSV of all distinct (:Drug)-[:CAUSES]->(:SideEffect) edges
@@ -95,7 +95,7 @@ print("Writing drug->side effect edges...")
 drug_side_effects_edges = pd.DataFrame(
     {':START_ID(Drug)': drug_side_effects['Drug ID'].apply(lambda drug: drug[3:]),
      ':END_ID(SideEffect)': [s[1:] for s in drug_side_effects['Side Effect ID']]})
-drug_side_effects_edges.to_csv('drug_side_effects_edges.csv', index=False)
+drug_side_effects_edges.to_csv('data/drug_side_effects_edges.csv', index=False)
 print("Done writing drug->side effect edges!")
 
 # Make a CSV of all distinct (:Drug)-[:INTERACTS]->(:Interaction) edges
@@ -110,7 +110,7 @@ drug_interaction_edges = drug_interaction_edges.append(
          ':END_ID(Interaction)': all_interaction_ids}),
     ignore_index=True)
 drug_interaction_edges.drop_duplicates(inplace=True)
-drug_interaction_edges.to_csv('drug_interaction_edges.csv', index=False)
+drug_interaction_edges.to_csv('data/drug_interaction_edges.csv', index=False)
 print("Done writing drug->interaction<-drug edges!")
 
 # Make a CSV of all distinct (:Interaction)-[:CAUSES]->(:SideEffect) edges
@@ -120,5 +120,5 @@ interaction_side_effects_edges = pd.DataFrame(
     {':START_ID(Interaction)': all_interaction_ids,
      ':END_ID(SideEffect)': [s[1:] for s in drug_interaction_side_effects['Side Effect ID']]})
 interaction_side_effects_edges.to_csv(
-    'interaction_side_effects_edges.csv', index=False)
+    'data/interaction_side_effects_edges.csv', index=False)
 print("Done writing interaction->side effect edges!")

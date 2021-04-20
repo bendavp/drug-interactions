@@ -23,7 +23,7 @@ CALL {
 }
 WITH side_effects + interaction_side_effects AS side_effects
 UNWIND side_effects AS side_effect
-RETURN side_effect.name AS side_effects
+RETURN side_effect.name AS side_effects;
 
 
 
@@ -66,7 +66,7 @@ CALL {
 
 WITH new_effects + new_interaction_effects AS new_side_effects
 UNWIND new_side_effects AS new_side_effect
-RETURN new_side_effect.name as new_side_effects
+RETURN new_side_effect.name as new_side_effects;
 
 
 
