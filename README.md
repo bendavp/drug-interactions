@@ -33,4 +33,4 @@ report in the root of this repo.
   for specific instructions)
 - some example Cypher queries (`queries.cypher`)
 - powerpoint, summarizing key points of project goals and outcomes
-- a website
+- a website (see `website/` folder for specific instructions)
