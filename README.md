@@ -11,6 +11,22 @@ Northeastern University
 - Deepak Ramesh Sethuraman: <https://github.com/deepakramesh14>
 - Benjamin Kosiborod (myself): <https://github.com/bendavp>
 
+## Summary:
+
+As part of the final project for Large-scale Information Storage and Retrieval,
+we were tasked with applying our newfound skills using NoSQL databases to create
+an interesting and useful application. Given some of our group members'
+background in biology, we knew we wanted to create something at the intersection
+of medicine and data science. We started with Stanford Biomedical Network data,
+and decided to focus on associations between drugs, the diseases that they
+treat, and the side effects that they cause. We created a graph-based
+drug-disease-side effect association database in Neo4J, with the below
+structure:
+![Graph "Schema"](https://imgur.com/RX1HFk4)
+
+To learn more about the project, please see the presentation slides or the final
+report in the root of this repo.
+
 ## Contents:
 
 - the setup scripts (produces CSVs in a `data/` directory, see `setup/` folder
