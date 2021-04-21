@@ -11,8 +11,6 @@ Northeastern University
 - Deepak Ramesh Sethuraman: <https://github.com/deepakramesh14>
 - Benjamin Kosiborod (myself): <https://github.com/bendavp>
 
-## Summary:
-
 ## Contents:
 
 - the setup scripts (produces CSVs in a `data/` directory, see `setup/` folder
