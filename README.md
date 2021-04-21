@@ -22,7 +22,7 @@ and decided to focus on associations between drugs, the diseases that they
 treat, and the side effects that they cause. We created a graph-based
 drug-disease-side effect association database in Neo4J, with the below
 structure:
-![Graph "Schema"](https://imgur.com/RX1HFk4)
+![Graph "Schema"](graph_image.png)
 
 To learn more about the project, please see the presentation slides or the final
 report in the root of this repo.
